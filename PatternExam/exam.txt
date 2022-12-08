@@ -1,0 +1,218 @@
+#include<iostream>
+#include<string.h>
+#include<windows.h>
+#include<stdlib.h>
+#include<fstream>
+#include<vector>
+#include<algorithm>
+#include<list>
+#include<map>
+#include<ctime>
+using namespace std;
+class planer
+{
+protected:
+	char havetodo[50];
+	int proirity;
+	char date[50];
+public:
+	virtual void setdo(char* a) = 0;
+	virtual void setpri(int a) = 0;
+	virtual void setdate(char* a) = 0;
+	virtual char* getdo() = 0;
+	virtual int getpri() = 0;
+	virtual char* getdate() = 0;
+	virtual void print() = 0;
+};
+class todo : public planer
+{
+public:
+	todo(char* a , char * d, int p)
+	{
+		strcpy(havetodo, a);
+		strcpy(date, d);
+		proirity = p;
+	}
+	void setdo(char* a)
+	{
+		strcpy(havetodo, a);
+	}
+	void setdate(char* a)
+	{
+		strcpy(date, a);
+	}
+	char* getdo()
+	{
+		return havetodo;
+	}
+	char* getdate()
+	{
+		return date;
+	}
+	void setpri(int a)
+	{
+		proirity = a;
+	}
+	int getpri()
+	{
+		return proirity;
+	}
+	void print()
+	{
+		cout << havetodo << " " << proirity << " " << date << endl;
+	}
+};
+//class prio : public planer
+//{
+//public:
+//	prio(int a)
+//	{
+//		proirity = a;
+//	}
+//	void setdo(char* a)
+//	{
+//		
+//	}
+//	void setdate(char* a)
+//	{
+//		
+//	}
+//	char* getdo()
+//	{
+//		return (char*)"zero";
+//	}
+//	char* getdate()
+//	{
+//		return (char*)"zero";
+//	}
+//	void setpri(int a)
+//	{
+//		proirity = a;
+//	}
+//	int getpri()
+//	{
+//		return proirity;
+//	}
+//};
+class create
+{
+public:
+	virtual todo* ctodo(char* doo, char* date, int p) = 0;
+	//virtual prio* cprio(int p) = 0;
+};
+class crttodo : public create
+{
+public:
+	todo* ctodo(char* doo, char* date, int p)
+	{
+		return new todo(doo, date, p);
+	}
+	//prio* cprio(int p)
+	//{
+	//	return new prio(p);
+	//}
+};
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	fstream file("d:\\zxcqweasdf.txt", ios::out);
+	int x = 0;
+	char havetodo[50];
+	int proirity;
+	char date[50];
+	char tag[50];
+	create* crt = new crttodo();
+	map<char*, planer*> a;
+	cout << "1 - create; 2 - delete; 3 - change; 4 - search by date; 5 - search by tag;6 - search by priority;7 - search by todo; 8 - write into file;9 - exit" << endl;
+	while (x != 9)
+	{
+		cin >> x;
+		if (x == 1)
+		{
+			cin >> havetodo >> proirity >> date;
+			planer* todo = crt->ctodo(havetodo, date, proirity);
+			cout << "Enter a tag: ";
+			cin >> tag;
+			a.insert(make_pair(tag, todo));
+		}
+		if (x == 2)
+		{
+			cout << "Vvedite teg" << endl;
+			cin >> tag;
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				if (strcmp(it->first, tag) == 0)
+				{
+					a.erase(it);
+					break;
+				}
+			}
+		}
+		if (x == 3)
+		{
+			cin >> havetodo >> proirity >> date;
+			planer* todo = crt->ctodo(havetodo, date, proirity);
+			cout << "Vvedite teg, kotoriy hotite zamenit" << endl;
+			cin >> tag;
+			a[tag] = todo;
+		}
+		if (x == 4)
+		{
+			cin >> date;
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				if (strcmp(it->second->getdate(), date) == 0)
+				{
+					cout << "tag" << it->first << endl;
+					it->second->print();
+				}
+			}
+		}
+		if (x == 5)
+		{
+			cin >> tag;
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				if (strcmp(it->first,tag) == 0)
+				{
+					cout << "tag" << it->first << endl;
+					it->second->print();
+				}
+			}
+		}
+		if (x == 6)
+		{
+			cin >> proirity;
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				if (it->second->getpri() == proirity)
+				{
+					cout << "tag" << it->first << endl;
+					it->second->print();
+				}
+			}
+		}
+		if (x == 7)
+		{
+			cin >> havetodo;
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				if (strcmp(it->second->getdo(), havetodo) == 0)
+				{
+					cout << "tag" << it->first << endl;
+					it->second->print();
+				}
+			}
+		}
+		if (x == 8)
+		{
+			for (auto it = a.begin(); it != a.end(); it++)
+			{
+				file.write(it->second->getdo(), 50);
+				file.write(it->second->getdate(),50);
+				file.write(it->first, 50);
+			}
+		}
+	}
+}
